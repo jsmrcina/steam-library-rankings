@@ -1,0 +1,5 @@
+*.csv
+*.log
+*.xml
+.ipynb_checkpoints/*
+steam_id.dat

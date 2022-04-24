@@ -4,3 +4,4 @@
 .ipynb_checkpoints/*
 steam_id.dat
 *.html
+__pycache__

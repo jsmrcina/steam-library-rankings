@@ -11,7 +11,7 @@ class SteamSpyQuery:
 
     def __init__(self, logger = None):
         self.logger = logger
-        self.httpClient = HttpClient()
+        self.httpClient = HttpClient(logger)
 
     def __get_data_for_game(self, appid: str, name: str):
         if self.logger:

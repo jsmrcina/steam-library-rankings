@@ -19,8 +19,7 @@ class SteamXmlProcessor:
 
     @classmethod
     def from_username(cls, username: str, cache_file: str = ""):
-        xml_url = 'http://steamcommunity.com/id/{0}/games?tab=all&xml=1'.format(
-            username)
+        xml_url = f'http://steamcommunity.com/id/{username}/games?tab=all&xml=1'
         httpClient = SimpleHttpClient()
         xml_contents = httpClient.get_request(xml_url, timeout = 5)
 

@@ -9,20 +9,19 @@ from steam.SteamSpyQuery import SteamSpyQuery
 from graphing.SteamDataBokehGraphGenerator import SteamDataBokehGraphGenerator
 
 
-def query_steam_data_for_user(log, directory = ""):
+def query_steam_data_for_user(directory = ""):
     # Note, your 'Game details' must be set to 'Public' for this to work.
     # This is done in your profile -> Edit Profile -> Privacy Settings -> Game details
     # To find your username, check your profile under General -> Custom URL
-    print(directory)
     username = ''
     if username == '':
         if os.path.exists(f"{directory}\steam_id.dat"):
-            log.info('Reading steam ID from file')
+            logging.info('Reading steam ID from file')
             with open(f"{directory}\steam_id.dat", "r",
                       encoding = "utf-8") as id_file:
                 username = id_file.read()
         else:
-            log.critical('Need steam user ID')
+            logging.critical('Need steam user ID')
             raise Exception("Missing steam id")
 
     cache_file = f"{directory}\{username}_steam_games.xml"
@@ -35,23 +34,24 @@ def query_steam_data_for_user(log, directory = ""):
 
 
 def main():
-    log = logging.getLogger()
-    fhandler = logging.FileHandler(filename = 'mylog.log', mode = 'a')
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    fhandler.setFormatter(formatter)
-    log.addHandler(fhandler)
-    log.setLevel(logging.CRITICAL)
+    logging.basicConfig(
+        filename = 'output.log',
+        encoding = 'utf-8',
+        format = '%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
+        level = logging.DEBUG)
+
+    print("Starting...")
+    print("See output.log for detailed logging info")
 
     # Work from pwd
     pwd = os.getcwd()
     data_directory = f"{pwd}\data"
 
     # Decorate our steam library info with ranking info from SteamSpy
-    game_infos = query_steam_data_for_user(log, data_directory)
+    game_infos = query_steam_data_for_user(data_directory)
     decorated_game_infos = pd.DataFrame.copy(game_infos)
 
-    steam_spy_query = SteamSpyQuery(log, data_directory)
+    steam_spy_query = SteamSpyQuery(data_directory)
     decorated_game_infos = steam_spy_query.get_data_for_games(
         decorated_game_infos)
     decorated_game_infos = MathUtils.add_bayesian_average_to_gamespy_dataframe(
@@ -76,6 +76,8 @@ def main():
     graph_generator.generate_most_played_games_versus_rating_graph()
     graph_generator.generate_best_unplayed_games_average()
     graph_generator.generate_best_unplayed_games_bayesian_average()
+
+    print("Finished!")
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
+import logging
 import pandas as pd
 
 from bokeh.plotting import figure, save, output_file
 from bokeh.models import ColumnDataSource, HoverTool, LabelSet
 from bokeh.palettes import Turbo256 as palette
 from bokeh.transform import linear_cmap
+from bokeh.util import logconfig
 
 
 class SteamDataBokehGraphGenerator:
@@ -11,6 +13,9 @@ class SteamDataBokehGraphGenerator:
     def __init__(self, decorated_game_infos, output_directory = "."):
         self.decorated_game_infos = decorated_game_infos
         self.output_directory = output_directory
+
+        # Make bokeh log to file
+        logconfig.basicConfig(level = logging.DEBUG, filename = "output.log")
 
     def generate_most_played_games_graph(self):
         # Plot most played games (ignore non played games)
@@ -40,8 +45,8 @@ class SteamDataBokehGraphGenerator:
                                    high = max(most_played_games[colName]))
 
         # Weird issue here where the text in LabelSet must be a string or it won't work, so decorate the data with strings
-        most_played_games["{0}Text".format(
-            colName)] = most_played_games[colName].apply(lambda x: str(x))
+        most_played_games[f"{colName}Text"] = most_played_games[colName].apply(
+            lambda x: str(x))
         data_source = ColumnDataSource(most_played_games)
 
         p = figure(
@@ -72,7 +77,7 @@ class SteamDataBokehGraphGenerator:
                           text_color = 'black',
                           x_offset = 5,
                           y_offset = -6,
-                          text = "{0}Text".format(colName),
+                          text = f"{colName}Text",
                           source = data_source,
                           render_mode = 'canvas')
 
@@ -92,7 +97,7 @@ class SteamDataBokehGraphGenerator:
             by = [colName], ascending = False)
 
         # Weird issue here where the text in LabelSet must be a string or it won't work, so decorate the data with strings
-        most_played_games_2w["{0}Text".format(colName)] = most_played_games_2w[
+        most_played_games_2w[f"{colName}Text"] = most_played_games_2w[
             colName].apply(lambda x: "{:.2f}".format(x))
         data_source = ColumnDataSource(most_played_games_2w)
 
@@ -114,7 +119,7 @@ class SteamDataBokehGraphGenerator:
                           text_color = 'black',
                           x_offset = -15,
                           y_offset = 10,
-                          text = "{0}Text".format(colName),
+                          text = f"{colName}Text",
                           source = data_source,
                           render_mode = 'canvas')
 
@@ -211,7 +216,7 @@ class SteamDataBokehGraphGenerator:
                                    high = max(best_unplayed_games[colName]))
 
         # Weird issue here where the text in LabelSet must be a string or it won't work, so decorate the data with strings
-        best_unplayed_games["{0}Text".format(colName)] = best_unplayed_games[
+        best_unplayed_games[f"{colName}Text"] = best_unplayed_games[
             colName].apply(lambda x: "{:.2f}".format(x))
 
         data_source = ColumnDataSource(best_unplayed_games)
@@ -243,7 +248,7 @@ class SteamDataBokehGraphGenerator:
                           text_color = 'black',
                           x_offset = 5,
                           y_offset = -6,
-                          text = "{0}Text".format(colName),
+                          text = f"{colName}Text",
                           source = data_source,
                           render_mode = 'canvas')
 
@@ -287,7 +292,7 @@ class SteamDataBokehGraphGenerator:
                                    high = max(best_unplayed_games[colName]))
 
         # Weird issue here where the text in LabelSet must be a string or it won't work, so decorate the data with strings
-        best_unplayed_games["{0}Text".format(colName)] = best_unplayed_games[
+        best_unplayed_games[f"{colName}Text"] = best_unplayed_games[
             colName].apply(lambda x: "{:.2f}".format(x))
 
         data_source = ColumnDataSource(best_unplayed_games)
@@ -320,7 +325,7 @@ class SteamDataBokehGraphGenerator:
                           text_color = 'black',
                           x_offset = 5,
                           y_offset = -6,
-                          text = "{0}Text".format(colName),
+                          text = f"{colName}Text",
                           source = data_source,
                           render_mode = 'canvas')
 

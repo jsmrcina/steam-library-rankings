@@ -1,6 +1,7 @@
 # Small module for querying data from SteamSpy
 import os
 import time
+import logging
 
 import pandas as pd
 
@@ -9,38 +10,34 @@ from simplehttp.SimpleHttpClient import SimpleHttpClient
 
 class SteamSpyQuery:
 
-    def __init__(self, logger = None, output_directory = "."):
-        self.logger = logger
-        self.httpClient = SimpleHttpClient(logger)
+    def __init__(self, output_directory = "."):
+        self.httpClient = SimpleHttpClient()
         self.output_directory = output_directory
 
     def __get_data_for_game(self, appid: str, name: str):
-        if self.logger:
-            self.logger.info("Request {0} from SteamSpy".format(name))
-            url = "http://steamspy.com/api.php"
-            parameters = {"request": "appdetails", "appid": appid}
-            json_data = self.httpClient.get_request(
-                url, parameters = parameters).json()
+        logging.info(f"Request {name} from SteamSpy")
+        url = "http://steamspy.com/api.php"
+        parameters = {"request": "appdetails", "appid": appid}
+        json_data = self.httpClient.get_request(
+            url, parameters = parameters).json()
 
-            # Only look at the first game that is returned as a result
-            if self.logger:
-                self.logger.debug("Finished request for {0}".format(name))
+        # Only look at the first game that is returned as a result
+        logging.debug(f"Finished request for {name}")
 
-            positive = int(json_data["positive"])
-            negative = int(json_data["negative"])
-            total_ratings = positive + negative
+        positive = int(json_data["positive"])
+        negative = int(json_data["negative"])
+        total_ratings = positive + negative
 
-            if total_ratings > 0:
-                ratio = (positive / total_ratings) * 100
-            else:
-                ratio = 0
+        if total_ratings > 0:
+            ratio = (positive / total_ratings) * 100
+        else:
+            ratio = 0
 
-            return (appid, name, positive, negative, positive + negative,
-                    ratio, int(json_data["userscore"]),
-                    int(json_data["average_forever"]),
-                    int(json_data["average_2weeks"]),
-                    int(json_data["median_forever"]),
-                    int(json_data["median_2weeks"]))
+        return (appid, name, positive, negative, positive + negative, ratio,
+                int(json_data["userscore"]), int(json_data["average_forever"]),
+                int(json_data["average_2weeks"]),
+                int(json_data["median_forever"]),
+                int(json_data["median_2weeks"]))
 
     # Get data from SteamSpy for each game
     # The structure of game_infos must be at least two columns named 'AppId' and 'Name', with AppId being the index.
@@ -76,8 +73,7 @@ class SteamSpyQuery:
             if cache.empty is False:
                 cache_row = cache.loc[cache['Name'] == name]
                 if cache_row.empty is False:
-                    if self.logger:
-                        self.logger.info("Found {0} in cache".format(name))
+                    logging.info(f"Found {name} in cache")
                     cache_found = True
 
             if cache_found is False:
@@ -87,9 +83,7 @@ class SteamSpyQuery:
 
             pulled = pulled + 1
             if pull_first_n is not None:
-                if self.logger:
-                    self.logger.debug("Pulled {0} of {1}".format(
-                        pulled, pull_first_n))
+                logging.debug(f"Pulled {pulled} of {pull_first_n}")
                 if pulled == pull_first_n:
                     break
 

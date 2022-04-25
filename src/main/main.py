@@ -15,16 +15,16 @@ def query_steam_data_for_user(directory = ""):
     # To find your username, check your profile under General -> Custom URL
     username = ''
     if username == '':
-        if os.path.exists(f"{directory}\steam_id.dat"):
+        if os.path.exists(f"{directory}\\steam_id.dat"):
             logging.info('Reading steam ID from file')
-            with open(f"{directory}\steam_id.dat", "r",
+            with open(f"{directory}\\steam_id.dat", "r",
                       encoding = "utf-8") as id_file:
                 username = id_file.read()
         else:
             logging.critical('Need steam user ID')
             raise Exception("Missing steam id")
 
-    cache_file = f"{directory}\{username}_steam_games.xml"
+    cache_file = f"{directory}\\{username}_steam_games.xml"
     if os.path.exists(cache_file):
         xmlProcessor = SteamXmlProcessor.from_file(cache_file)
     else:
@@ -36,7 +36,6 @@ def query_steam_data_for_user(directory = ""):
 def main():
     logging.basicConfig(
         filename = 'output.log',
-        encoding = 'utf-8',
         format = '%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
         level = logging.DEBUG)
 
@@ -45,7 +44,7 @@ def main():
 
     # Work from pwd
     pwd = os.getcwd()
-    data_directory = f"{pwd}\data"
+    data_directory = f"{pwd}\\data"
 
     # Decorate our steam library info with ranking info from SteamSpy
     game_infos = query_steam_data_for_user(data_directory)
@@ -67,7 +66,7 @@ def main():
         inplace = True)
 
     # Write to file for easy access
-    decorated_game_infos.to_csv(f"{data_directory}\decorated_game_infos.csv")
+    decorated_game_infos.to_csv(f"{data_directory}\\decorated_game_infos.csv")
 
     graph_generator = SteamDataBokehGraphGenerator(decorated_game_infos,
                                                    data_directory)

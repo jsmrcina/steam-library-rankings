@@ -1,8 +1,9 @@
 import requests
 import time
+from requests.exceptions import SSLError
 
 
-class HttpClient:
+class SimpleHttpClient:
 
     def __init__(self, logger = None):
         self.logger = logger
@@ -15,12 +16,14 @@ class HttpClient:
                                     params = parameters,
                                     timeout = timeout)
         except SSLError as s:
-            if self.logger: self.logger.error('SSL Error:', s)
+            if self.logger:
+                self.logger.error('SSL Error:', s)
 
             for i in range(5, 0, -1):
                 print('\rWaiting... ({})'.format(i), end = '')
                 time.sleep(1)
-            if self.logger: self.logger.warn('\rRetrying.' + ' ' * 10)
+            if self.logger:
+                self.logger.warn('\rRetrying.' + ' ' * 10)
 
             # Recusively try again
             return self.get_request(url, parameters)
@@ -35,5 +38,6 @@ class HttpClient:
             if self.logger:
                 self.logger.warn('No response, waiting 10 seconds...')
             time.sleep(10)
-            if self.logger: self.logger.warn('Retrying.')
+            if self.logger:
+                self.logger.warn('Retrying.')
             return self.get_request(url, parameters)

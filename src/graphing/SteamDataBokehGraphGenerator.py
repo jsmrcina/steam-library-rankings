@@ -1,20 +1,21 @@
 import pandas as pd
 
 from bokeh.plotting import figure, save, output_file
-from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper, Label, LabelSet
+from bokeh.models import ColumnDataSource, HoverTool, LabelSet
 from bokeh.palettes import Turbo256 as palette
 from bokeh.transform import linear_cmap
 
 
 class SteamDataBokehGraphGenerator:
 
-    def __init__(self, decorated_game_infos):
+    def __init__(self, decorated_game_infos, output_directory = "."):
         self.decorated_game_infos = decorated_game_infos
+        self.output_directory = output_directory
 
     def generate_most_played_games_graph(self):
         # Plot most played games (ignore non played games)
         colName = "HoursOnRecord"
-        output_file("MostPlayed.html")
+        output_file(f"{self.output_directory}/MostPlayed.html")
 
         most_played_games = pd.DataFrame.copy(self.decorated_game_infos)
         most_played_games.drop(
@@ -81,7 +82,7 @@ class SteamDataBokehGraphGenerator:
     def generate_most_played_games_2weeks_graph(self):
         # Plot most played games in last 2 weeks
         colName = "HoursLast2Weeks"
-        output_file("MostPlayedLast2Weeks.html")
+        output_file(f"{self.output_directory}/MostPlayedLast2Weeks.html")
 
         most_played_games_2w = pd.DataFrame.copy(self.decorated_game_infos)
         most_played_games_2w.drop(
@@ -123,7 +124,7 @@ class SteamDataBokehGraphGenerator:
     def generate_most_played_games_versus_rating_graph(self):
         # Plot most played games versus their rating
         colName = "HoursOnRecord"
-        output_file("MostPlayedVsRating.html")
+        output_file(f"{self.output_directory}/MostPlayedVsRating.html")
 
         most_played_games = pd.DataFrame.copy(self.decorated_game_infos)
         most_played_games = most_played_games.sort_values(by = [colName],
@@ -178,7 +179,7 @@ class SteamDataBokehGraphGenerator:
     def generate_best_unplayed_games_average(self):
         # Plot best ranked unplayed games
         colName = "RatingsRatio"
-        output_file("UnplayedPlainRating.html")
+        output_file(f"{self.output_directory}/UnplayedPlainRating.html")
 
         tooltips = [('Game', '@Name'), ('Rating', '@RatingsRatio')]
 
@@ -254,7 +255,7 @@ class SteamDataBokehGraphGenerator:
     def generate_best_unplayed_games_bayesian_average(self):
         # Plot best ranked unplayed games
         colName = "BayesianAverage"
-        output_file("UnplayedBayesian.html")
+        output_file(f"{self.output_directory}/UnplayedBayesian.html")
 
         tooltips = [('Game', '@Name'), ('Rating', '@BayesianAverage')]
 

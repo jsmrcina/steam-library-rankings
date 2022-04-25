@@ -1,5 +1,5 @@
 import os
-from SimpleRequest import HttpClient
+from simplehttp.SimpleHttpClient import SimpleHttpClient
 import pandas as pd
 import xml.etree.ElementTree as ET
 
@@ -8,7 +8,6 @@ class SteamXmlProcessor:
 
     def __init__(self, data):
         self.data = data
-        self.init = True
 
     @classmethod
     def from_file(cls, filename: str):
@@ -19,10 +18,10 @@ class SteamXmlProcessor:
             raise Exception(f"{filename} does not exist")
 
     @classmethod
-    def from_username(cls, username: str, cache_file: str = None):
+    def from_username(cls, username: str, cache_file: str = ""):
         xml_url = 'http://steamcommunity.com/id/{0}/games?tab=all&xml=1'.format(
             username)
-        httpClient = HttpClient()
+        httpClient = SimpleHttpClient()
         xml_contents = httpClient.get_request(xml_url, timeout = 5)
 
         if cache_file:
@@ -32,9 +31,9 @@ class SteamXmlProcessor:
         return cls(xml_contents.text)
 
     # Reads the games XML returned from get_steam_xml() and outputs a pandas dataframe
-    def get_game_infos(cls):
+    def get_game_infos(self):
 
-        tree = ET.ElementTree(ET.fromstring(cls.data))
+        tree = ET.ElementTree(ET.fromstring(self.data))
         root = tree.getroot()
 
         if root.find('error') is not None:
@@ -43,17 +42,32 @@ class SteamXmlProcessor:
         game_infos = []
 
         for game in root.iter('game'):
-            app_id = game.find('appID').text
-            name = game.find('name').text
+            app_id_node = game.find('appID')
+            if app_id_node is None:
+                raise Exception("Missing AppId Node for game")
+            app_id = app_id_node.text
 
-            propertyOrDefault = lambda name, default: (game.find(
-                name).text) if (game.find(name) is not None) else default
+            name_node = game.find('name')
+            if name_node is None:
+                raise Exception("Missing Name Node for game")
+            name = name_node.text
+
+            def propertyOrDefault(name, default: str) -> str:
+                name_node = game.find(name)
+                if name_node is None:
+                    return default
+
+                result = name_node.text
+                if result is None:
+                    return ""
+                return result
 
             # Rest of these are optional
             logo_link = propertyOrDefault('logo', '')
             store_link = propertyOrDefault('storeLink', '')
-            hours_last_2_weeks = float(propertyOrDefault('hoursLast2Weeks', 0))
-            hours_on_record = float(propertyOrDefault('hoursOnRecord', 0))
+            hours_last_2_weeks = float(
+                propertyOrDefault('hoursLast2Weeks', '0.0'))
+            hours_on_record = float(propertyOrDefault('hoursOnRecord', '0.0'))
             stats_link = propertyOrDefault('statsLink', '')
             global_stats_link = propertyOrDefault('globalStatsLink', '')
 

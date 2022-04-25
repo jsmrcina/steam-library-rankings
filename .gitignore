@@ -1,7 +1,5 @@
-*.csv
-*.log
-*.xml
-.ipynb_checkpoints/*
-steam_id.dat
-*.html
+.ipynb_checkpoints
+data
 __pycache__
+.coverage
+*.log

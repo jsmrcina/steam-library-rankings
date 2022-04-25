@@ -4,14 +4,15 @@ import time
 
 import pandas as pd
 
-from SimpleRequest import HttpClient
+from simplehttp.SimpleHttpClient import SimpleHttpClient
 
 
 class SteamSpyQuery:
 
-    def __init__(self, logger = None):
+    def __init__(self, logger = None, output_directory = "."):
         self.logger = logger
-        self.httpClient = HttpClient(logger)
+        self.httpClient = SimpleHttpClient(logger)
+        self.output_directory = output_directory
 
     def __get_data_for_game(self, appid: str, name: str):
         if self.logger:
@@ -20,20 +21,22 @@ class SteamSpyQuery:
             parameters = {"request": "appdetails", "appid": appid}
             json_data = self.httpClient.get_request(
                 url, parameters = parameters).json()
-            downloaded_info = pd.DataFrame.from_dict(json_data,
-                                                     orient = 'index')
 
             # Only look at the first game that is returned as a result
-            game = downloaded_info[0]
             if self.logger:
                 self.logger.debug("Finished request for {0}".format(name))
 
             positive = int(json_data["positive"])
             negative = int(json_data["negative"])
+            total_ratings = positive + negative
+
+            if total_ratings > 0:
+                ratio = (positive / total_ratings) * 100
+            else:
+                ratio = 0
+
             return (appid, name, positive, negative, positive + negative,
-                    (positive / (positive + negative)) *
-                    100 if positive + negative > 0 else 0,
-                    int(json_data["userscore"]),
+                    ratio, int(json_data["userscore"]),
                     int(json_data["average_forever"]),
                     int(json_data["average_2weeks"]),
                     int(json_data["median_forever"]),
@@ -57,7 +60,7 @@ class SteamSpyQuery:
 
         cache = pd.DataFrame(columns = cache_columns)
         if use_cache is True:
-            cache_file = "steam_spy_cache.csv"
+            cache_file = f"{self.output_directory}/steam_spy_cache.csv"
             if os.path.exists(cache_file):
                 cache = pd.read_csv(cache_file, index_col = "AppId")
         else:
@@ -70,14 +73,14 @@ class SteamSpyQuery:
             appid = index
 
             cache_found = False
-            if cache.empty == False:
+            if cache.empty is False:
                 cache_row = cache.loc[cache['Name'] == name]
-                if cache_row.empty == False:
+                if cache_row.empty is False:
                     if self.logger:
                         self.logger.info("Found {0} in cache".format(name))
                     cache_found = True
 
-            if cache_found == False:
+            if cache_found is False:
                 new_cache_data.append(self.__get_data_for_game(appid, name))
                 # Per documentation, don't make more than 1 request per second
                 time.sleep(2)

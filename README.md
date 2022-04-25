@@ -15,3 +15,7 @@ python src/main/main.py
 6. Under the data folder, you can find the analyzed data: your steam XML, a CSV with all of the raw data, and a few Bokeh graphs summarizing that data
 
 Any issues will be logged into the output.log file.
+
+# Test Status
+
+[![Tests](https://github.com/jsmrcina/steam-library-rankings/actions/workflows/tests.yml/badge.svg)](https://github.com/jsmrcina/steam-library-rankings/actions/workflows/tests.yml)

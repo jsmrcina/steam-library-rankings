@@ -51,8 +51,8 @@ class SteamDataBokehGraphGenerator:
 
         p = figure(
             y_range = most_played_games["Name"],
-            plot_width = 2000,
-            plot_height = 1250,
+            width = 2000,
+            height = 1250,
             title = "Most Played Games of All Time",
             tools = select_tools,
             x_range = (0, max(most_played_games[colName] + 20)),
@@ -78,8 +78,7 @@ class SteamDataBokehGraphGenerator:
                           x_offset = 5,
                           y_offset = -6,
                           text = f"{colName}Text",
-                          source = data_source,
-                          render_mode = 'canvas')
+                          source = data_source)
 
         p.add_layout(labels)
         save(p)
@@ -120,8 +119,7 @@ class SteamDataBokehGraphGenerator:
                           x_offset = -15,
                           y_offset = 10,
                           text = f"{colName}Text",
-                          source = data_source,
-                          render_mode = 'canvas')
+                          source = data_source)
 
         p.add_layout(labels)
         save(p)
@@ -158,11 +156,10 @@ class SteamDataBokehGraphGenerator:
                           y_offset = -5,
                           text = "DisplayName",
                           source = data_source,
-                          render_mode = 'canvas',
                           text_font_size = "8pt")
 
-        p = figure(plot_height = 1000,
-                   plot_width = 2000,
+        p = figure(height = 1000,
+                   width = 2000,
                    title = "Most played vs ranking",
                    tools = select_tools,
                    x_range = (0, max(most_played_games[colName]) + 50))
@@ -225,8 +222,8 @@ class SteamDataBokehGraphGenerator:
         max_range = int(max(best_unplayed_games[colName]) + 2)
         p = figure(y_range = best_unplayed_games["Name"],
                    x_range = (min_range, max_range),
-                   plot_width = 2000,
-                   plot_height = 1250,
+                   width = 2000,
+                   height = 1250,
                    title = "Best unplayed games",
                    tools = select_tools)
 
@@ -249,8 +246,7 @@ class SteamDataBokehGraphGenerator:
                           x_offset = 5,
                           y_offset = -6,
                           text = f"{colName}Text",
-                          source = data_source,
-                          render_mode = 'canvas')
+                          source = data_source)
 
         p.add_layout(labels)
 
@@ -301,8 +297,8 @@ class SteamDataBokehGraphGenerator:
         max_range = int(max(best_unplayed_games[colName]) + 2)
         p = figure(y_range = best_unplayed_games["Name"],
                    x_range = (min_range, max_range),
-                   plot_width = 2000,
-                   plot_height = 1250,
+                   width = 2000,
+                   height = 1250,
                    title = "Best unplayed games",
                    tools = select_tools)
 
@@ -326,8 +322,7 @@ class SteamDataBokehGraphGenerator:
                           x_offset = 5,
                           y_offset = -6,
                           text = f"{colName}Text",
-                          source = data_source,
-                          render_mode = 'canvas')
+                          source = data_source)
 
         p.add_layout(labels)
 

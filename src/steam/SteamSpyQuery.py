@@ -59,7 +59,24 @@ class SteamSpyQuery:
         if use_cache is True:
             cache_file = f"{self.output_directory}/steam_spy_cache.csv"
             if os.path.exists(cache_file):
-                cache = pd.read_csv(cache_file, index_col = "AppId")
+                cache = pd.read_csv(cache_file)
+                legacy_app_id_columns = [
+                    column for column in cache.columns
+                    if column.startswith("Unnamed:")
+                ]
+                for column in legacy_app_id_columns:
+                    cache["AppId"] = cache["AppId"].fillna(cache[column])
+                cache.drop(columns = legacy_app_id_columns,
+                           inplace = True,
+                           errors = "ignore")
+                cache.set_index("AppId", inplace = True)
+                cache.index = pd.to_numeric(cache.index, errors = "coerce")
+                invalid_cache_rows = cache.index.isna()
+                if invalid_cache_rows.any():
+                    logging.warning("Ignoring SteamSpy cache rows without AppId")
+                    cache = cache[~invalid_cache_rows]
+                cache.index = cache.index.astype("int64")
+                cache.index.name = "AppId"
         else:
             cache_file = ""
 
@@ -71,9 +88,8 @@ class SteamSpyQuery:
 
             cache_found = False
             if cache.empty is False:
-                cache_row = cache.loc[cache['Name'] == name]
-                if cache_row.empty is False:
-                    logging.info(f"Found {name} in cache")
+                if appid in cache.index:
+                    logging.info(f"Found {name} ({appid}) in cache")
                     cache_found = True
 
             if cache_found is False:
@@ -112,10 +128,11 @@ class SteamSpyQuery:
             pd.concat(frames)
             if frames
             else pd.DataFrame(columns = cache_columns).set_index("AppId"))
+        final_cache = final_cache[~final_cache.index.duplicated(keep = "last")]
         if use_cache is True:
             final_cache.to_csv(cache_file)
 
         # Add the new columns to the existing game_infos.
         # Both DataFrames are indexed by AppId so join index-to-index.
-        game_infos_df.drop("Name", axis = 1, inplace = True)
-        return game_infos_df.join(final_cache, how = 'left')
+        steam_spy_data = final_cache.drop(columns = ["Name"], errors = "ignore")
+        return game_infos_df.join(steam_spy_data, how = 'left')

@@ -31,6 +31,9 @@ class SteamDataBokehGraphGenerator:
         most_played_games = most_played_games.nlargest(50, colName)
         most_played_games = most_played_games.sort_values(by = [colName],
                                                           ascending = True)
+        if most_played_games.empty:
+            logging.warning("Skipping MostPlayed graph because it has no data")
+            return
 
         tooltips = [('Game', '@Name'), ('Hours Played', '@HoursOnRecord'),
                     ('Rating', '@BayesianAverage')]
@@ -92,6 +95,10 @@ class SteamDataBokehGraphGenerator:
         most_played_games_2w.drop(
             most_played_games_2w[most_played_games_2w[colName] == 0].index,
             inplace = True)
+        if most_played_games_2w.empty:
+            logging.warning(
+                "Skipping MostPlayedLast2Weeks graph because it has no data")
+            return
         most_played_games_2w = most_played_games_2w.sort_values(
             by = [colName], ascending = False)
 
@@ -132,6 +139,10 @@ class SteamDataBokehGraphGenerator:
         most_played_games = pd.DataFrame.copy(self.decorated_game_infos)
         most_played_games = most_played_games.sort_values(by = [colName],
                                                           ascending = False)
+        if most_played_games.empty:
+            logging.warning(
+                "Skipping MostPlayedVsRating graph because it has no data")
+            return
 
         tooltips = [('Game', '@Name'), ('Hours Played', '@HoursOnRecord'),
                     ('Rating', '@BayesianAverage')]
@@ -206,6 +217,10 @@ class SteamDataBokehGraphGenerator:
         best_unplayed_games = best_unplayed_games.nlargest(50, colName)
         best_unplayed_games = best_unplayed_games.sort_values(by = [colName],
                                                               ascending = True)
+        if best_unplayed_games.empty:
+            logging.warning(
+                "Skipping UnplayedPlainRating graph because it has no data")
+            return
 
         color_mapper = linear_cmap(field_name = colName,
                                    palette = palette,
@@ -281,6 +296,10 @@ class SteamDataBokehGraphGenerator:
         best_unplayed_games = best_unplayed_games.nlargest(50, colName)
         best_unplayed_games = best_unplayed_games.sort_values(by = [colName],
                                                               ascending = True)
+        if best_unplayed_games.empty:
+            logging.warning(
+                "Skipping UnplayedBayesian graph because it has no data")
+            return
 
         color_mapper = linear_cmap(field_name = colName,
                                    palette = palette,

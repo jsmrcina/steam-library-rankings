@@ -101,6 +101,15 @@ class SteamDataBokehGraphGenerator:
             output_filename = "MostPlayedOnline.html"
         )
 
+    def generate_most_played_games_deck_graph(self):
+        # Plot most played games on Steam Deck (online time only — offline
+        # playtime is not tracked per-device by the Steam API)
+        self._generate_most_played_games_graph_impl(
+            col_name = "HoursOnRecordDeck",
+            title = "Most Played Games on Steam Deck (Online Only)",
+            output_filename = "MostPlayedDeck.html"
+        )
+
     def generate_most_played_games_2weeks_graph(self):
         # Plot most played games in last 2 weeks
         colName = "HoursLast2Weeks"

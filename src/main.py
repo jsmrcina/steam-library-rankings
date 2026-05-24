@@ -13,22 +13,37 @@ def query_steam_data_for_user(directory = ""):
     # Note, your 'Game details' must be set to 'Public' for this to work.
     # This is done in your profile -> Edit Profile -> Privacy Settings -> Game details
     # To find your username, check your profile under General -> Custom URL
+    # Get a free API key at https://steamcommunity.com/dev/apikey and
+    # save it to data/steam_api_key.dat
     username = ''
     if username == '':
         if os.path.exists(f"{directory}\\steam_id.dat"):
             logging.info('Reading steam ID from file')
             with open(f"{directory}\\steam_id.dat", "r",
                       encoding = "utf-8") as id_file:
-                username = id_file.read()
+                username = id_file.read().strip()
         else:
             logging.critical('Need steam user ID')
             raise Exception("Missing steam id")
 
-    cache_file = f"{directory}\\{username}_steam_games.xml"
+    api_key = os.environ.get("STEAM_API_KEY", "")
+    if not api_key:
+        api_key_file = f"{directory}\\steam_api_key.dat"
+        if os.path.exists(api_key_file):
+            logging.info('Reading Steam API key from file')
+            with open(api_key_file, "r", encoding="utf-8") as key_file:
+                api_key = key_file.read().strip()
+        else:
+            logging.critical('Need Steam API key')
+            raise Exception(
+                "Missing Steam API key - save it to data/steam_api_key.dat "
+                "or set STEAM_API_KEY env var")
+
+    cache_file = f"{directory}\\{username}_steam_games.json"
     if os.path.exists(cache_file):
         xmlProcessor = SteamXmlProcessor.from_file(cache_file)
     else:
-        xmlProcessor = SteamXmlProcessor.from_username(username, cache_file)
+        xmlProcessor = SteamXmlProcessor.from_username(api_key, username, cache_file)
 
     return xmlProcessor.get_game_infos()
 

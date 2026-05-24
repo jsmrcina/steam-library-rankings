@@ -106,11 +106,16 @@ class SteamSpyQuery:
             })
         new_cache.set_index("AppId", inplace = True)
 
-        # Merge new cache and existing cache data
-        final_cache = pd.concat([cache, new_cache])
+        # Merge new cache and existing cache data.
+        frames = [df for df in [cache, new_cache] if not df.empty]
+        final_cache = (
+            pd.concat(frames)
+            if frames
+            else pd.DataFrame(columns = cache_columns).set_index("AppId"))
         if use_cache is True:
             final_cache.to_csv(cache_file)
 
-        # Add the new columns to the existing game_infos, drop Names since they're duplicated otherwise
+        # Add the new columns to the existing game_infos.
+        # Both DataFrames are indexed by AppId so join index-to-index.
         game_infos_df.drop("Name", axis = 1, inplace = True)
-        return game_infos_df.join(final_cache, on = "AppId", how = 'left')
+        return game_infos_df.join(final_cache, how = 'left')

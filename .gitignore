@@ -4,3 +4,5 @@ __pycache__
 .coverage
 *.log
 *.egg-info
+.venv
+steam_api_key.dat

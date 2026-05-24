@@ -91,6 +91,7 @@ def main():
                                                    data_directory)
     graph_generator.generate_most_played_games_graph()
     graph_generator.generate_most_played_games_online_graph()
+    graph_generator.generate_most_played_games_deck_graph()
     graph_generator.generate_most_played_games_2weeks_graph()
     graph_generator.generate_most_played_games_versus_rating_graph()
     graph_generator.generate_best_unplayed_games_average()

@@ -85,11 +85,14 @@ class SteamXmlProcessor:
                 (game.get("playtime_forever", 0) +
                  game.get("playtime_disconnected", 0)) / 60
             )
+            hours_on_record_deck = int(
+                game.get("playtime_deck_forever", 0) / 60
+            )
 
             game_infos.append((
                 app_id, name, logo_link, store_link,
                 hours_last_2_weeks, hours_on_record_online, hours_on_record,
-                "", ""
+                hours_on_record_deck, "", ""
             ))
 
         df = pd.DataFrame.from_records(
@@ -97,7 +100,7 @@ class SteamXmlProcessor:
             columns=[
                 "AppId", "Name", "LogoLink", "StoreLink",
                 "HoursLast2Weeks", "HoursOnRecordOnline", "HoursOnRecord",
-                "StatsLink", "GlobalStatsLink"
+                "HoursOnRecordDeck", "StatsLink", "GlobalStatsLink"
             ]
         )
         df = df.astype(dtype={
@@ -108,6 +111,7 @@ class SteamXmlProcessor:
             "HoursLast2Weeks": "int64",
             "HoursOnRecordOnline": "int64",
             "HoursOnRecord": "int64",
+            "HoursOnRecordDeck": "int64",
             "StatsLink": "object",
             "GlobalStatsLink": "object",
         })

@@ -17,48 +17,47 @@ class SteamDataBokehGraphGenerator:
         # Make bokeh log to file
         logconfig.basicConfig(level = logging.DEBUG, filename = "output.log")
 
-    def generate_most_played_games_graph(self):
-        # Plot most played games (ignore non played games)
-        colName = "HoursOnRecord"
-        output_file(f"{self.output_directory}/MostPlayed.html")
+    def _generate_most_played_games_graph_impl(self, col_name, title,
+                                               output_filename):
+        output_file(f"{self.output_directory}/{output_filename}")
 
         most_played_games = pd.DataFrame.copy(self.decorated_game_infos)
         most_played_games.drop(
-            most_played_games[most_played_games[colName] == 0].index,
+            most_played_games[most_played_games[col_name] == 0].index,
             inplace = True)
 
-        # Take just top 30
-        most_played_games = most_played_games.nlargest(50, colName)
-        most_played_games = most_played_games.sort_values(by = [colName],
+        # Take just top 50
+        most_played_games = most_played_games.nlargest(50, col_name)
+        most_played_games = most_played_games.sort_values(by = [col_name],
                                                           ascending = True)
         if most_played_games.empty:
-            logging.warning("Skipping MostPlayed graph because it has no data")
+            logging.warning(f"Skipping {output_filename} graph: no data")
             return
 
-        tooltips = [('Game', '@Name'), ('Hours Played', '@HoursOnRecord'),
+        tooltips = [('Game', '@Name'), ('Hours Played', f'@{col_name}'),
                     ('Rating', '@BayesianAverage')]
 
         select_tools = [
             'box_select', 'lasso_select', 'poly_select', 'tap', 'reset'
         ]
 
-        color_mapper = linear_cmap(field_name = colName,
+        color_mapper = linear_cmap(field_name = col_name,
                                    palette = palette,
-                                   low = min(most_played_games[colName]),
-                                   high = max(most_played_games[colName]))
+                                   low = min(most_played_games[col_name]),
+                                   high = max(most_played_games[col_name]))
 
         # Weird issue here where the text in LabelSet must be a string or it won't work, so decorate the data with strings
-        most_played_games[f"{colName}Text"] = most_played_games[colName].apply(
-            lambda x: str(x))
+        most_played_games[f"{col_name}Text"] = most_played_games[
+            col_name].apply(lambda x: str(x))
         data_source = ColumnDataSource(most_played_games)
 
         p = figure(
             y_range = most_played_games["Name"],
             width = 2000,
             height = 1250,
-            title = "Most Played Games of All Time",
+            title = title,
             tools = select_tools,
-            x_range = (0, max(most_played_games[colName] + 20)),
+            x_range = (0, max(most_played_games[col_name] + 20)),
         )
 
         p.title.text_font_size = '32pt'
@@ -68,23 +67,39 @@ class SteamDataBokehGraphGenerator:
 
         p.hbar(y = "Name",
                left = 0,
-               right = colName,
+               right = col_name,
                height = 0.5,
                source = data_source,
                color = color_mapper)
         p.add_tools(HoverTool(tooltips = tooltips))
 
-        labels = LabelSet(x = colName,
+        labels = LabelSet(x = col_name,
                           y = "Name",
                           level = 'annotation',
                           text_color = 'black',
                           x_offset = 5,
                           y_offset = -6,
-                          text = f"{colName}Text",
+                          text = f"{col_name}Text",
                           source = data_source)
 
         p.add_layout(labels)
         save(p)
+
+    def generate_most_played_games_graph(self):
+        # Plot most played games including offline/disconnected time
+        self._generate_most_played_games_graph_impl(
+            col_name = "HoursOnRecord",
+            title = "Most Played Games of All Time (Online + Offline)",
+            output_filename = "MostPlayed.html"
+        )
+
+    def generate_most_played_games_online_graph(self):
+        # Plot most played games using online playtime only
+        self._generate_most_played_games_graph_impl(
+            col_name = "HoursOnRecordOnline",
+            title = "Most Played Games of All Time (Online Only)",
+            output_filename = "MostPlayedOnline.html"
+        )
 
     def generate_most_played_games_2weeks_graph(self):
         # Plot most played games in last 2 weeks

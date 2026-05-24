@@ -1,12 +1,14 @@
 import os
 import json
+from typing import Any
+
 from simplehttp.SimpleHttpClient import SimpleHttpClient
 import pandas as pd
 
 
 class SteamXmlProcessor:
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, Any]):
         self.data = data
 
     @classmethod

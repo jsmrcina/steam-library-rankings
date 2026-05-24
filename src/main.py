@@ -75,9 +75,13 @@ def main():
     decorated_game_infos = decorated_game_infos.sort_values(
         by = ['BayesianAverage'], ascending = False)
 
-    # DLCs have no ratings, drop them from the list
+    # DLCs have no ratings and are unplayed; keep any game that has been played
+    # even if SteamSpy has no rating data for it (e.g. new Early Access titles)
     decorated_game_infos.drop(
-        decorated_game_infos[decorated_game_infos["RatingsRatio"] == 0].index,
+        decorated_game_infos[
+            (decorated_game_infos["RatingsRatio"] == 0) &
+            (decorated_game_infos["HoursOnRecord"] == 0)
+        ].index,
         inplace = True)
 
     # Write to file for easy access
@@ -86,6 +90,7 @@ def main():
     graph_generator = SteamDataBokehGraphGenerator(decorated_game_infos,
                                                    data_directory)
     graph_generator.generate_most_played_games_graph()
+    graph_generator.generate_most_played_games_online_graph()
     graph_generator.generate_most_played_games_2weeks_graph()
     graph_generator.generate_most_played_games_versus_rating_graph()
     graph_generator.generate_best_unplayed_games_average()

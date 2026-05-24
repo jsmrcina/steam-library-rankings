@@ -76,13 +76,19 @@ class SteamXmlProcessor:
             )
             store_link = f"https://store.steampowered.com/app/{app_id}"
 
-            # API returns playtime in minutes; convert to integer hours
+            # API returns playtime in minutes; convert to integer hours.
+            # playtime_forever is online-only; playtime_disconnected holds
+            # time played in Steam offline mode and must be added separately.
             hours_last_2_weeks = int(game.get("playtime_2weeks", 0) / 60)
-            hours_on_record = int(game.get("playtime_forever", 0) / 60)
+            hours_on_record_online = int(game.get("playtime_forever", 0) / 60)
+            hours_on_record = int(
+                (game.get("playtime_forever", 0) +
+                 game.get("playtime_disconnected", 0)) / 60
+            )
 
             game_infos.append((
                 app_id, name, logo_link, store_link,
-                hours_last_2_weeks, hours_on_record,
+                hours_last_2_weeks, hours_on_record_online, hours_on_record,
                 "", ""
             ))
 
@@ -90,7 +96,7 @@ class SteamXmlProcessor:
             game_infos,
             columns=[
                 "AppId", "Name", "LogoLink", "StoreLink",
-                "HoursLast2Weeks", "HoursOnRecord",
+                "HoursLast2Weeks", "HoursOnRecordOnline", "HoursOnRecord",
                 "StatsLink", "GlobalStatsLink"
             ]
         )
@@ -100,6 +106,7 @@ class SteamXmlProcessor:
             "LogoLink": "object",
             "StoreLink": "object",
             "HoursLast2Weeks": "int64",
+            "HoursOnRecordOnline": "int64",
             "HoursOnRecord": "int64",
             "StatsLink": "object",
             "GlobalStatsLink": "object",
